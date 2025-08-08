@@ -1,3 +1,5 @@
+// routes/user.js or wherever your register route is
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -8,35 +10,36 @@ router.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
+    // Check if email already registered
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ error: 'Email already registered' });
+    if (existingUser)
+      return res.status(400).json({ error: 'Email already registered' });
 
-    const user = new User({ username, email, password });
+    // Don't allow isAdmin to be set by request
+    const user = new User({
+      username,
+      email,
+      password,
+      isAdmin: false // Always set false manually
+    });
+
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.status(201).json({ token, user: { id: user._id, username, email } });
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET
+    );
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        username,
+        email,
+        isAdmin: user.isAdmin
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-// POST /api/login
-router.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ token, user: { id: user._id, username: user.username, email } });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-module.exports = router;
