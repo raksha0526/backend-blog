@@ -13,7 +13,9 @@ app.use(express.json());
 const blogRoutes = require('./routes/blogRoutes');
 const readingRoutes = require('./routes/readingRoutes');
 
-app.use(blogRoutes);
+
+app.use('/api/posts', blogRoutes);
+
 app.use(readingRoutes); // ✅ make sure this is after app is defined
 
 // MongoDB connect
