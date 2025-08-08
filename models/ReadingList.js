@@ -1,11 +1,20 @@
+// models/ReadingList.js
 const mongoose = require('mongoose');
 
-const readingListSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+const ReadingListSchema = new mongoose.Schema({
+  title: String,
   author: String,
   cover: String,
   completed: Boolean,
-  date: { type: Date, default: Date.now }
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-module.exports = mongoose.model('ReadingList', readingListSchema);
+module.exports = mongoose.model('ReadingList', ReadingListSchema);

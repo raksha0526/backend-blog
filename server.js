@@ -2,13 +2,19 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+const authRoutes = require('./routes/auth');
+// server.js
+const adminRoutes = require('./routes/admin');
+
+
 
 const app = express();
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
-
+app.use(authRoutes);
+app.use('/api/admin', adminRoutes);
 // Import & use routes
 const blogRoutes = require('./routes/blogRoutes');
 const readingRoutes = require('./routes/readingRoutes');

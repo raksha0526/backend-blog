@@ -1,17 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const ReadingList = require('../models/ReadingList');
+const auth = require('../middleware/auth');
 
-// GET all reading list items
-router.get('/api/readinglist', async (req, res) => {
-  const list = await ReadingList.find().sort({ date: -1 });
-  res.json(list);
+// GET reading list items for logged-in user
+router.get('/api/readinglist', auth, async (req, res) => {
+  try {
+    const list = await ReadingList.find({ user: req.user.id }).sort({ date: -1 });
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// POST new book to reading list
-router.post('/api/readinglist', async (req, res) => {
+// POST a new book to the reading list (for logged-in user)
+router.post('/api/readinglist', auth, async (req, res) => {
   try {
-    const newItem = new ReadingList(req.body);
+    const newItem = new ReadingList({ ...req.body, user: req.user.id });
     const saved = await newItem.save();
     res.status(201).json(saved);
   } catch (err) {
@@ -20,4 +25,3 @@ router.post('/api/readinglist', async (req, res) => {
 });
 
 module.exports = router;
-
