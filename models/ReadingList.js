@@ -1,20 +1,23 @@
-// models/ReadingList.js
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const ReadingListSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  cover: String,
-  completed: Boolean,
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  date: {
-    type: Date,
-    default: Date.now
-  }
+const userSchema = new mongoose.Schema({
+  email:    { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  isAdmin:  { type: Boolean, default: false }
 });
 
-module.exports = mongoose.model('ReadingList', ReadingListSchema);
+// Hash password before saving
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Password check method
+userSchema.methods.comparePassword = function (enteredPassword) {
+  return bcrypt.compare(enteredPassword, this.password);
+};
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+module.exports = User;

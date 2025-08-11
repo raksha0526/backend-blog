@@ -6,7 +6,6 @@ const commentSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  username: String, // Or you can populate this dynamically
   text: String,
   date: {
     type: Date,
@@ -16,13 +15,18 @@ const commentSchema = new mongoose.Schema({
 
 const postSchema = new mongoose.Schema({
   title: String,
+  bookAuthor: String,       // renamed for clarity
   content: String,
   image: String,
+  author: {                 // blog post creator
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   date: {
     type: Date,
     default: Date.now
   },
   comments: [commentSchema]
-});
+}, { collection: 'books' }); // keep if your collection is named "books"
 
 module.exports = mongoose.model('Post', postSchema);
