@@ -15,7 +15,7 @@ const auth = async (req, res, next) => {
     if (!user) return res.status(401).json({ error: 'User not found.' });
     console.log('User role:', user.role);
 
-    eq.user = user;
+    req.user = user;  // <-- fixed typo here
     next();
   } catch (err) {
     res.status(401).json({ error: 'Invalid token.' });
@@ -23,10 +23,11 @@ const auth = async (req, res, next) => {
 };
 
 const adminAuth = (req, res, next) => {
-  console.log('Admin auth check for user role:', req.user.role);  // <-- Debug here
+  console.log('Admin auth check for user role:', req.user.role);  // debug log
   if (req.user && req.user.role === 'admin') next();
   else res.status(403).json({ error: 'Access denied. Admins only.' });
 };
 
+module.exports = { auth, adminAuth };
 
 module.exports = { auth, adminAuth };
